@@ -1,5 +1,7 @@
 python-haproxy-tools
 ====================
+Python Library for managing HAProxy
 
-- Python Library for managing HAProxy
-- server change methods in servers.py
+- server add/remove/change methods in servers.py
+- update of local haproxy config file in update.py
+- test of jenkins instances in jenkins.py
