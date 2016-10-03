@@ -10,9 +10,9 @@ import urllib, json
 url = "http://localhost:3000/api/v1/todos"
 response = urllib.urlopen(url)
 data = json.loads(response.read())
-defaultsFile = "1_default.txt"
-frontendsFile = "2_frontends.txt"
-backendsFile = "3_backends.txt"
+defaultsFile = "configs/1_default.txt"
+frontendsFile = "configs/2_frontends.txt"
+backendsFile = "configs/3_backends.txt"
 
 
 # looks for server name in both frontend and backend
@@ -102,7 +102,7 @@ def changeServer(server1, server2):
 # combines existing defaults, frontend, and backend files
 # produces complete haproxy config file
 def combineConfig():
-    combined = sorted(glob.glob('*.txt'))
+    combined = sorted(glob.glob('configs/*.txt'))
     with open("../result.txt", "wb") as outfile:
         for f in combined:
             with open(f, "rb") as infile:
