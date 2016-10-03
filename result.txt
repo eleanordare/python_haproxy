@@ -33,5 +33,3 @@ backend second
   balance roundrobin
   mode http
   server second localhost:9090 check
-
-
