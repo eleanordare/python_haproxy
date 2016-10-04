@@ -1,0 +1,8 @@
+
+
+
+backend first
+  balance roundrobin
+  mode http
+  server first localhost:8080 check
+
