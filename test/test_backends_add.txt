@@ -1,0 +1,4 @@
+backend name
+  balance roundrobin
+  mode http
+  server name localhost:8080 check

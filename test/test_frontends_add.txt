@@ -1,0 +1,6 @@
+frontend main
+  bind localhost:8081
+  mode http
+  default_backend first
+  acl url_name path_beg /name
+  use_backend name if url_name
