@@ -1,16 +1,16 @@
 __author__ = 'Eleanor Mehlenbacher'
 
-newConfig = "result.txt"
-haproxyConfig = "/etc/haproxy/haproxy.cfg"
+class updateConfig():
 
-def updateConfig(newConfig):
-    f = open(newConfig, 'r')
-    lines = f.readlines()
-    f.close()
+    def update(self):
+        newConfig = "result.txt"
+        haproxyConfig = "/etc/haproxy/haproxy.cfg"
 
-    f = open(haproxyConfig, 'w')
-    for line in lines:
-        f.write(line)
-    f.close()
+        f = open(newConfig, 'r')
+        lines = f.readlines()
+        f.close()
 
-updateConfig(newConfig)
+        f = open(haproxyConfig, 'w')
+        for line in lines:
+            f.write(line)
+        f.close()

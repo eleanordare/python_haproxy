@@ -9,44 +9,40 @@ import urllib, json
 
 class serverMethods():
 
-    url = "http://localhost:3000/api/v1/todos"
-    response = urllib.urlopen(url)
-    data = json.loads(response.read())
-    defaultsFile = "configs/1_default.txt"
-    frontendsFile = "configs/2_frontends.txt"
-    backendsFile = "configs/3_backends.txt"
-
-    # looks for server name in both frontend and backend
+    # looks for server name in frontend
     # returns True if server is found
-    def checkIfExisting(self, server):
-        with open(frontendsFile) as f:
+    def checkIfExistingInFrontend(self, frontendsFile, server):
+        with open(frontendsFile, 'r') as f:
+            for line in f:
+                if server["text"] in line and "default_backend" not in line:
+                    return True
+        return False
+
+    # looks for server name in backend
+    # returns True if server is found
+    def checkIfExistingInBackend(self, backendsFile, server):
+        with open(backendsFile, 'r') as f:
             for line in f:
                 if server["text"] in line:
                     return True
-
-        with open(backendsFile) as f:
-            for line in f:
-                if server["text"] in line:
-                    return True
-
         return False
 
     # checks if server is in frontend file
     # adds default server configuration to frontend setup
     def addServerToFrontend(self, frontendsFile, server):
-        # if not checkIfExisting(server):
-        frontends = open(frontendsFile, 'a')
-        frontends.write("  acl url_" + server["text"] + " path_beg /" + server["text"] + "\n")
-        frontends.write("  use_backend " + server["text"] + " if url_" + server["text"] + "\n")
-        frontends.close()
+        if not self.checkIfExistingInFrontend(frontendsFile, server):
+            frontends = open(frontendsFile, 'a')
+            frontends.write("  acl url_" + server["text"] + " path_beg /" + server["text"] + "\n")
+            frontends.write("  use_backend " + server["text"] + " if url_" + server["text"] + "\n")
+            frontends.close()
 
     # checks if server is in backend file
     # adds default server configuration to backend setup
     def addServerToBackend(self, backendsFile, server):
-        # if not checkIfExisting(server):
-        backends = open(backendsFile, 'a')
-        backends.write("\nbackend " + server["text"] + "\n  balance roundrobin" + "\n  mode http" + "\n  server " + server["text"] + " " + str(server["ip"]) + ":" + str(server["port"]) + " check\n\n")
-        backends.close()
+        if not self.checkIfExistingInBackend(backendsFile, server):
+            backends = open(backendsFile, 'a')
+            backends.write("\nbackend " + server["text"] + "\n  balance roundrobin" + "\n  mode http" + "\n  server " + server["text"] + " " + str(server["ip"]) + ":" + str(server["port"]) + " check\n\n")
+            backends.close()
 
     # looks for server name in frontend
     # removes lines associated with server in files
@@ -86,8 +82,8 @@ class serverMethods():
     # checks if new server info already exists
     # if not, rewrites frontend/backend with new server info
     def changeServerInFrontend(self, frontendsFile, server1, server2):
-        # if checkIfExisting(server2):
-        #     return
+        if self.checkIfExistingInFrontend(frontendsFile, server2):
+            return
 
         filedata = None
         with open(frontendsFile, 'r') as file:
@@ -100,8 +96,8 @@ class serverMethods():
     # checks if new server info already exists
     # if not, rewrites frontend/backend with new server info
     def changeServerInBackend(self, backendsFile, server1, server2):
-        # if checkIfExisting(server2):
-        #     return
+        if self.checkIfExistingInBackend(backendsFile, server2):
+            return
 
         filedata = None
         with open(backendsFile, 'r') as file:
@@ -117,19 +113,17 @@ class serverMethods():
     # produces complete haproxy config file
     def combineConfig(self):
         combined = sorted(glob.glob('configs/*.txt'))
-        with open("../result.txt", "wb") as outfile:
+        with open("result.txt", "wb") as outfile:
             for f in combined:
                 with open(f, "rb") as infile:
                     outfile.write(infile.read() + "\n")
 
 
 if __name__ == '__main__':
-    url = "http://localhost:3000/api/v1/todos"
-    response = urllib.urlopen(url)
-    data = json.loads(response.read())
-    defaultsFile = "configs/1_default.txt"
-    frontendsFile = "configs/2_frontends.txt"
-    backendsFile = "configs/3_backends.txt"
+    # url = "http://localhost:3000/api/v1/todos"
+    # response = urllib.urlopen(url)
+    # data = json.loads(response.read())
+    # defaultsFile = "configs/1_default.txt"
+    # frontendsFile = "configs/2_frontends.txt"
+    # backendsFile = "configs/3_backends.txt"
     serverMethods = serverMethods()
-    # serverMethods.addServerToFrontend(frontendsFile, data[1])
-    # addServer(frontendsFile, backendsFile, data[0])
