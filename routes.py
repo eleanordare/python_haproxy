@@ -11,6 +11,7 @@ updateHAProxy = updateHAProxy()
 defaultsFile = "configs/1_default.txt"
 frontendsFile = "configs/2_frontends.txt"
 backendsFile = "configs/3_backends.txt"
+domainsFile = "configs/domain2backend.map"
 
 # content on page
 @route('/hello')
@@ -25,7 +26,7 @@ def add():
     server = content[0]
 
     # adds server to frontend and backend files
-    serverMethods.addServerToFrontend(frontendsFile, server)
+    serverMethods.addServerToFrontend(domainsFile, server)
     serverMethods.addServerToBackend(backendsFile, server)
 
     # combines frontend and backend files
@@ -43,7 +44,7 @@ def update():
     server2 = content[1]
 
     # update server in frontend and backend files
-    serverMethods.changeServerInFrontend(frontendsFile, server1, server2)
+    serverMethods.changeServerInFrontend(domainsFile, server1, server2)
     serverMethods.changeServerInBackend(backendsFile, server1, server2)
 
     # combines frontend and backend files
@@ -60,7 +61,7 @@ def delete():
     server = content[0]
 
     # remove server from frontend and backend files
-    serverMethods.removeServerFromFrontend(frontendsFile, server)
+    serverMethods.removeServerFromFrontend(domainsFile, server)
     serverMethods.removeServerFromBackend(backendsFile, server)
 
     # combines frontend and backend files
@@ -70,5 +71,4 @@ def delete():
     updateHAProxy.restart()
 
 
-
-run(host='localhost', port=5000, debug=True)
+run(host='localhost', port=5000)

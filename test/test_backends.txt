@@ -5,4 +5,5 @@ backend first
   balance roundrobin
   mode http
   server first localhost:8080 check
+  server firstBackup localhost:8080 check backup
 

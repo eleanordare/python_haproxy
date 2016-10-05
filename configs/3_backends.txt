@@ -2,8 +2,17 @@ backend first
   balance roundrobin
   mode http
   server first localhost:8080 check
+  server firstBackup localhost:8888 check backup
 
 backend second
   balance roundrobin
   mode http
   server second localhost:9090 check
+  server secondBackup localhost:9999 check backup
+
+backend newerName
+  balance roundrobin
+  mode http
+  server newerName localhost:6666 check
+  server newerNameBackup localhost:6666 check backup
+

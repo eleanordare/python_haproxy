@@ -2,7 +2,4 @@ frontend main
   bind localhost:8081
   mode http
   default_backend first
-  acl url_first path_beg /first
-  use_backend first if url_first
-  acl url_second path_beg /second
-  use_backend second if url_second
+  use_backend %[req.hdr(host),lower,map(/etc/haproxy/domain2backend.map,first)]

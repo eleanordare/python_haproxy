@@ -7,36 +7,38 @@ from servers import serverMethods
 
 frontendsFile = "test/test_frontends.txt"
 backendsFile = "test/test_backends.txt"
+domainsFile = "test/test_domain2backend.map"
 
 addFrontendsFile = "test/test_frontends_add.txt"
 addBackendsFile = "test/test_backends_add.txt"
+addDomainsFile = "test/test_domain2backend_add.map"
 
 removeFrontendsFile = "test/test_frontends_remove.txt"
 removeBackendsFile = "test/test_backends_remove.txt"
+removeDomainsFile = "test/test_domain2backend_remove.map"
 
 changeFrontendsFile = "test/test_frontends_change.txt"
 changeBackendsFile = "test/test_backends_change.txt"
+changeDomainsFile = "test/test_domain2backend_change.map"
 
-url = "http://localhost:3000/api/v1/todos"
-response = urllib.urlopen(url)
-data = json.loads(response.read())
+data = [{"id":7,"text":"first","ip":"localhost","port":8080},{"id":9,"text":"second","ip":"localhost","port":9090}]
 
 serverMethods = serverMethods()
 
 
 class testAddServerToFrontend(unittest.TestCase):
     def setUp(self):
-        serverMethods.addServerToFrontend(frontendsFile, data[1])
+        serverMethods.addServerToFrontend(domainsFile, data[1])
 
     def test_add_server_to_frontend(self):
         # reads content from expected result file
         expected = None
-        with open(addFrontendsFile, 'r') as file:
+        with open(addDomainsFile, 'r') as file:
             expected = file.read()
 
         # reads content from changed frontend file
         changed = None
-        with open(frontendsFile, 'r') as file:
+        with open(domainsFile, 'r') as file:
             changed = file.read()
 
         expected = expected.replace('\n', '')
@@ -46,11 +48,11 @@ class testAddServerToFrontend(unittest.TestCase):
 
     # restore test frontend file
     def tearDown(self):
-        f = open(frontendsFile, 'r')
+        f = open(domainsFile, 'r')
         lines = f.readlines()
         f.close()
 
-        f = open(frontendsFile, 'w')
+        f = open(domainsFile, 'w')
         ignoreLines = False
         for line in lines:
             if "second" in line:
@@ -98,17 +100,17 @@ class testAddServerToBackend(unittest.TestCase):
 
 class testRemoveServerFromFrontend(unittest.TestCase):
     def setUp(self):
-        serverMethods.removeServerFromFrontend(frontendsFile, data[0])
+        serverMethods.removeServerFromFrontend(domainsFile, data[0])
 
     def test_remove_server_from_frontend(self):
         # reads content from expected result file
         expected = None
-        with open(removeFrontendsFile, 'r') as file:
+        with open(removeDomainsFile, 'r') as file:
             expected = file.read()
 
         # reads content from changed backend file
         changed = None
-        with open(frontendsFile, 'r') as file:
+        with open(domainsFile, 'r') as file:
             changed = file.read()
 
         expected = expected.replace('\n', '')
@@ -118,9 +120,8 @@ class testRemoveServerFromFrontend(unittest.TestCase):
 
     # restore test frontend file
     def tearDown(self):
-        f = open(frontendsFile, 'a')
-        f.write("  acl url_first path_beg /first\n")
-        f.write("  use_backend first if url_first\n")
+        f = open(domainsFile, 'a')
+        f.write("/first  first\n")
         f.close()
 
 
@@ -147,23 +148,23 @@ class testRemoveServerFromBackend(unittest.TestCase):
     # restore test frontend file
     def tearDown(self):
         f = open(backendsFile, 'a')
-        f.write("\nbackend first\n  balance roundrobin\n  mode http\n  server first localhost:8080 check\n\n")
+        f.write("\nbackend first\n  balance roundrobin\n  mode http\n  server first localhost:8080 check\n  server firstBackup localhost:8080 check backup\n\n")
         f.close()
 
 
 class testChangeServerInFrontend(unittest.TestCase):
     def setUp(self):
-        serverMethods.changeServerInFrontend(frontendsFile, data[0], data[1])
+        serverMethods.changeServerInFrontend(domainsFile, data[0], data[1])
 
     def test_change_server_in_frontend(self):
         # reads content from expected result file
         expected = None
-        with open(changeFrontendsFile, 'r') as file:
+        with open(changeDomainsFile, 'r') as file:
             expected = file.read()
 
         # reads content from changed backend file
         changed = None
-        with open(frontendsFile, 'r') as file:
+        with open(domainsFile, 'r') as file:
             changed = file.read()
 
         expected = expected.replace('\n', '')
@@ -173,13 +174,9 @@ class testChangeServerInFrontend(unittest.TestCase):
 
     # restore test frontend file
     def tearDown(self):
-        f = open(frontendsFile, 'w')
-        f.write("frontend main\n")
-        f.write("  bind localhost:8081\n")
-        f.write("  mode http\n")
-        f.write("  default_backend name\n")
-        f.write("  acl url_first path_beg /first\n")
-        f.write("  use_backend first if url_first\n")
+        f = open(domainsFile, 'w')
+        f.write("#domainname  backendname\n")
+        f.write("/first  first\n")
         f.close()
 
 
@@ -206,7 +203,7 @@ class testChangeServerInBackend(unittest.TestCase):
     # restore test frontend file
     def tearDown(self):
         f = open(backendsFile, 'w')
-        f.write("\nbackend first\n  balance roundrobin\n  mode http\n  server first localhost:8080 check\n\n")
+        f.write("\nbackend first\n  balance roundrobin\n  mode http\n  server first localhost:8080 check\n  server firstBackup localhost:8080 check backup\n\n")
         f.close()
 
 
