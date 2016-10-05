@@ -120,10 +120,10 @@ class serverMethods():
 
 
 if __name__ == '__main__':
-    # url = "http://localhost:3000/api/v1/todos"
-    # response = urllib.urlopen(url)
-    # data = json.loads(response.read())
-    # defaultsFile = "configs/1_default.txt"
-    # frontendsFile = "configs/2_frontends.txt"
-    # backendsFile = "configs/3_backends.txt"
+    url = "http://localhost:3000/api/v1/todos"
+    response = urllib.urlopen(url)
+    data = json.loads(response.read())
+    defaultsFile = "configs/1_default.txt"
+    frontendsFile = "configs/2_frontends.txt"
+    backendsFile = "configs/3_backends.txt"
     serverMethods = serverMethods()

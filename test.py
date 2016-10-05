@@ -1,3 +1,5 @@
+__author__ = 'Eleanor Mehlenbacher'
+
 import unittest
 import urllib, json
 import re

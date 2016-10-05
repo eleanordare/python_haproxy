@@ -1,6 +1,8 @@
 __author__ = 'Eleanor Mehlenbacher'
 
-class updateConfig():
+import subprocess
+
+class updateHAProxy():
 
     def update(self):
         newConfig = "result.txt"
@@ -14,3 +16,7 @@ class updateConfig():
         for line in lines:
             f.write(line)
         f.close()
+
+    def restart(self):
+        command = ['service', 'haproxy', 'restart']
+        subprocess.call(command, shell=False)

@@ -1,9 +1,12 @@
+__author__ = 'Eleanor Mehlenbacher'
+
 from bottle import get, post, request, put, delete, run, route
 from servers import serverMethods
-from update import updateConfig
+from update import updateHAProxy
+import json
 
 serverMethods = serverMethods()
-updateConfig = updateConfig()
+updateHAProxy = updateHAProxy()
 
 defaultsFile = "configs/1_default.txt"
 frontendsFile = "configs/2_frontends.txt"
@@ -18,44 +21,53 @@ def addPage():
 @post('/hello')
 def add():
     # retrieves server information from body of request
-    server = {"text":request.forms.get('name'),
-                "ip":request.forms.get('ip'),
-                "port":request.forms.get('port')}
-                
+    content = json.load(request.body)
+    server = content[0]
+
     # adds server to frontend and backend files
     serverMethods.addServerToFrontend(frontendsFile, server)
     serverMethods.addServerToBackend(backendsFile, server)
 
-    # combines frontend and backend files, updates local config
+    # combines frontend and backend files
+    # updates local config and restarts haproxy
     serverMethods.combineConfig()
-    updateConfig.update()
+    updateHAProxy.update()
+    updateHAProxy.restart()
 
 # changing an existing server
 @put('/hello')
 def update():
-    server1 = {"text":request.forms.get('name1'),
-                "ip":request.forms.get('ip1'),
-                "port":request.forms.get('port1')}
-    server2 = {"text":request.forms.get('name2'),
-                "ip":request.forms.get('ip2'),
-                "port":request.forms.get('port2')}
+    # retrieves server information from body of request
+    content = json.load(request.body)
+    server1 = content[0]
+    server2 = content[1]
+
+    # update server in frontend and backend files
     serverMethods.changeServerInFrontend(frontendsFile, server1, server2)
     serverMethods.changeServerInBackend(backendsFile, server1, server2)
 
+    # combines frontend and backend files
+    # updates local config and restarts haproxy
     serverMethods.combineConfig()
-    updateConfig.update()
+    updateHAProxy.update()
+    updateHAProxy.restart()
 
 # delete an existing server
 @delete('/hello')
 def delete():
-    server = {"text":request.forms.get('name'),
-                "ip":request.forms.get('ip'),
-                "port":request.forms.get('port')}
+    # retrieves server information from body of request
+    content = json.load(request.body)
+    server = content[0]
+
+    # remove server from frontend and backend files
     serverMethods.removeServerFromFrontend(frontendsFile, server)
     serverMethods.removeServerFromBackend(backendsFile, server)
 
+    # combines frontend and backend files
+    # updates local config and restarts haproxy
     serverMethods.combineConfig()
-    updateConfig.update()
+    updateHAProxy.update()
+    updateHAProxy.restart()
 
 
 
