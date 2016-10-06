@@ -6,5 +6,3 @@ training.py
 .ropeproject
 result.txt
 jenkins.py
-Dockerfile
-.gitignore
