@@ -4,5 +4,9 @@ Python Library for managing HAProxy
 
 - server add/remove/change methods in servers.py
 - update of local haproxy config file in update.py
-- test of jenkins instances in jenkins.py (in-progress)
+- routes for HTTP requests with respective server methods in routes.py
 - unit tests of server methods in test/ and test.py
+
+in-progress
+- test of jenkins instances in jenkins.py
+- more unit tests
