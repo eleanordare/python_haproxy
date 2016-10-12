@@ -1,27 +1,83 @@
 __author__ = 'Eleanor Mehlenbacher'
 
-import urllib
-import subprocess
+import urllib, urllib2, json, base64
 
-jenkinsInstances = "etc/jenkins.txt"
-jenkinsWAR = "~/jenkins-2.0/usr/share/jenkins/jenkins.war"
+# ping jenkins instance
+# save json content from jenkins instance
+# if jenkins instance doesn't return anything, start it up
+# analyze json content --- for now just choose executed builds
+# if executed builds are 0, shut it down (for now)
 
-def checkRunning(instance):
-    register = urllib.urlopen(instance).getcode()
-    if register is not "404":
-        return True
+# later on will add some kind of ping from jenkins json
+# to python routes.py that will add the server to HAProxy config
 
-def startLocalInstance():
-    subprocess.call(['java', '-jar', 'jenkinsWAR'])
+jenkins = "http://localhost:8080"
+username = "admin"
+password = "admin"
 
-def main():
-    f = open(jenkinsInstances, 'r')
-    instances = f.readlines()
-    f.close()
+class jenkinsMethods():
 
-    # for instance in instances:
-        # print checkRunning(instance)
+    # pull down JSON of instance info from Jenkins
+    def getJenkinsJSON(self, instance, username, password):
+        request = urllib2.Request(instance + "/api/json")
+        base64string = base64.b64encode('%s:%s' % (username, password))
+        request.add_header("Authorization", "Basic %s" % base64string)
+        data = json.load(urllib2.urlopen(request))
+        return data
+
+    # need to get crumb for POST requests because of CSRF protection
+    def getJenkinsCrumb(self, instance, username, password):
+        request = urllib2.Request(instance + "/crumbIssuer/api/json")
+        base64string = base64.b64encode('%s:%s' % (username, password))
+        request.add_header("Authorization", "Basic %s" % base64string)
+        data = json.load(urllib2.urlopen(request))
+
+        crumb = [data['crumbRequestField'],data['crumb']]
+        return crumb
+
+    # POST request to jenkins/safeRestart to restart instance
+    # in safe mode to put Jenkins into quiet mode, then restart
+    def restartInstance(self, instance, username, password, crumb):
+        method = "POST"
+        handler = urllib2.HTTPHandler()
+        opener = urllib2.build_opener(handler)
+        data = urllib.urlencode({'':''})
+        base64string = base64.b64encode('%s:%s' % (username, password))
+
+        request = urllib2.Request(instance + "/safeRestart", data=data)
+        request.add_header("Content-Type", 'application/json')
+        request.add_header("Authorization", "Basic %s" % base64string)
+        request.add_header(crumb[0], crumb[1])
+        request.get_method = lambda: method
+
+        try:
+            connection = opener.open(request)
+        except urllib2.HTTPError,e:
+            connection = e
+
+    # POST request to jenkins/safeExit to stop instance
+    # in safe mode to put Jenkins into quiet mode, then stop
+    def stopInstance(self, instance, username, password, crumb):
+        method = "POST"
+        handler = urllib2.HTTPHandler()
+        opener = urllib2.build_opener(handler)
+        data = urllib.urlencode({'':''})
+        base64string = base64.b64encode('%s:%s' % (username, password))
+
+        request = urllib2.Request(instance + "/safeExit", data=data)
+        request.add_header("Content-Type", 'application/json')
+        request.add_header("Authorization", "Basic %s" % base64string)
+        request.add_header(crumb[0], crumb[1])
+        request.get_method = lambda: method
+
+        try:
+            connection = opener.open(request)
+        except urllib2.HTTPError,e:
+            connection = e
 
 
-main()
-startLocalInstance()
+
+if __name__ == '__main__':
+    jenkinsMethods = jenkinsMethods()
+    crumb = jenkinsMethods.getJenkinsCrumb(jenkins, username, password)
+    jenkinsMethods.stopInstance(jenkins, username, password, crumb)

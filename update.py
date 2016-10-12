@@ -31,4 +31,5 @@ class updateHAProxy():
 
     def restart(self):
         command = ['service', 'haproxy', 'restart']
-        subprocess.call(command, shell=False)
+        subprocess.call(command, shell=True)
+        return

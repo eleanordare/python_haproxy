@@ -1,16 +1,22 @@
-FROM registry.access.redhat.com/rhscl/python-35-rhel7
+FROM fedora 
 
 ADD routes.py /
 ADD servers.py /
 ADD update.py /
 ADD test.py /
-ADD test/ /
-ADD configs/ /
+ADD test /test
+ADD configs /configs
 
-RUN yum install -y python-pip
+USER root
+ENV container=docker
+
+RUN yum install python-pip
 RUN pip install bottle
 RUN yum install haproxy
-RUN systemctl start haproxy
-RUN systemctl enable haproxy
+
+CMD service haproxy start
+
+EXPOSE 5000
+EXPOSE 8081
 
 CMD [ "python", "./routes.py" ]
