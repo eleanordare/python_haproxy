@@ -1,16 +1,14 @@
+#!/usr/bin/env python
 __author__ = 'Eleanor Mehlenbacher'
 
 import urllib, urllib2, json, base64
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # ping jenkins instance
 # save json content from jenkins instance
 # if jenkins instance doesn't return anything, start it up
 # analyze json content --- for now just choose executed builds
 # if executed builds are 0, shut it down (for now)
-
-# later on will add some kind of ping from jenkins json
-# to python routes.py that will add the server to HAProxy config
 
 jenkins = "http://localhost:8080"
 username = "admin"
@@ -28,7 +26,7 @@ class jenkinsMethods():
 
     # pull down JSON of instance info from Jenkins
     def getJenkinsJSON(self, instance, username, password):
-        request = urllib2.Request(instance + "/api/json")
+        request = urllib2.Request(instance + "/api/json?depth=1")
         base64string = base64.b64encode('%s:%s' % (username, password))
         request.add_header("Authorization", "Basic %s" % base64string)
         data = json.load(urllib2.urlopen(request))
@@ -47,7 +45,7 @@ class jenkinsMethods():
 
 
     # use Monitoring plugin external API to find latest HTTP hit
-    def getLastHit(self, instance, username, password):
+    def getLatestHit(self, instance, username, password):
         request = urllib2.Request(instance + "/monitoring?format=json&period=tout")
         base64string = base64.b64encode('%s:%s' % (username, password))
         request.add_header("Authorization", "Basic %s" % base64string)
@@ -106,8 +104,27 @@ class jenkinsMethods():
             connection = e
 
 
+class jenkinsMain():
 
-if __name__ == '__main__':
-    jenkinsMethods = jenkinsMethods()
-    # crumb = jenkinsMethods.getJenkinsCrumb(jenkins, username, password)
-    # jenkinsMethods.stopInstance(jenkins, username, password, crumb)
+    def main(self, jenkinsMethods, jenkins):
+        # check if instance is running
+        # check latest hit
+        # check busy executors
+        # if latest hit was before (choose arbitrary date)
+        # run jenkins stop instance
+
+        if not jenkinsMethods.checkRunning:
+            print "This instance is not running."
+
+        latest = jenkinsMethods.getLatestHit(jenkins, username, password)
+        data = jenkinsMethods.getJenkinsJSON(jenkins, username, password)
+        crumb = jenkinsMethods.getJenkinsCrumb(jenkins, username, password)
+        busyExecutors = data["assignedLabels"][0]["busyExecutors"]
+
+        arbitraryDate = datetime.now() - timedelta(days=10)
+
+        if latest<arbitraryDate and busyExecutors == 0:
+            print "Shutting down unused Jenkins instance --> " + jenkins
+            jenkinsMethods.stopInstance(jenkins, username, password, crumb)
+        else:
+            print "Jenkins instance is up and running --> " + jenkins

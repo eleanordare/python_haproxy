@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 __author__ = 'Eleanor Mehlenbacher'
 
 import subprocess

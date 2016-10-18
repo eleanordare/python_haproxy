@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 __author__ = 'Eleanor Mehlenbacher'
 
 from bottle import get, post, request, put, delete, run, route
